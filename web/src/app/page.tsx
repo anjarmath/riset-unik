@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
+import AnalyzeForm from "@/features/analyze/components/AnalyzeForm";
 
 export default function Home() {
   return (
     <div>
-      Hello World!
-      <Button>Button</Button>
+      <AnalyzeForm />
     </div>
   );
 }
