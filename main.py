@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from models.schemas import AnalyzeResponse, AnalyzeRequest
 from services.doaj import search_doaj
 from services.semantic_scholar import search_s2
@@ -6,6 +7,15 @@ from services.similiarity import analyze_similarity
 import re
 
 app = FastAPI()
+
+# 🛡️ Konfigurasi CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -21,7 +31,9 @@ async def analyze_topic(data: AnalyzeRequest):
 
 
     doaj_results = await search_doaj(topic)
-    s2_results = await search_s2(topic)
+    s2_results = await search_s2(topic, 40)
+
+    print(s2_results)
 
     # Flatten all paper title
     combined = doaj_results + s2_results
