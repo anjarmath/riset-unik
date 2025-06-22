@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className=" w-full">
       <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 items-center">
-        <Image src={AppIcon} width={120} height={64} alt="logo" />
+        <Image src={AppIcon} width={150} height={80} alt="logo" />
 
         <div className=" text-center space-y-2 mt-4">
           <CardTitle className=" text-lg">
@@ -28,7 +28,7 @@ export default function Home() {
         <p className=" text-muted-foreground text-sm flex gap-2">
           Created with ❤ by Anjar |{" "}
           <a
-            href="https://github.com/anjarmath/acc-ga-ya"
+            href="https://github.com/anjarmath/riset-unik"
             className=" flex items-center gap-2 "
           >
             <GitBranch size="16" /> Go to repository
