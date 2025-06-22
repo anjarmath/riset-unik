@@ -35,6 +35,9 @@ def analyze_similarity(user_topic, titles_with_links):
             if "title" in item and "link" in item
         ]
 
+        # Sort results by similarity
+        results.sort(key=lambda item: item.similarity, reverse=True)
+
         avg = float(np.mean(scores)) if scores else 0.0
         return AnalyzeResponse(average_similarity=avg, results=results)
 
