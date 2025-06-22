@@ -1,17 +1,25 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+
 from models.schemas import AnalyzeResponse, AnalyzeRequest
 from services.doaj import search_doaj
 from services.semantic_scholar import search_s2
 from services.similiarity import analyze_similarity
 import re
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI()
+app.state.limiter = limiter
 
 app = FastAPI()
 
 # 🛡️ Konfigurasi CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "https://accgaya.algieba-id.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,11 +27,13 @@ app.add_middleware(
 
 
 @app.get("/")
-async def root():
+@limiter.limit("2/minute")
+async def root(request: Request):
     return {"message": "Hello World"}
 
 @app.post("/analyze", response_model=AnalyzeResponse)
-async def analyze_topic(data: AnalyzeRequest):
+@limiter.limit("2/minute")
+async def analyze_topic(data: AnalyzeRequest, request: Request):
     topic = data.topic
     is_valid, result = validate_topic(topic)
     if not is_valid:
