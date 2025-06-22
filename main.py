@@ -50,13 +50,8 @@ async def analyze_topic(data: AnalyzeRequest, request: Request):
 
     # Flatten all paper title
     combined = doaj_results + s2_results
-    if not combined:
-        raise HTTPException(status_code=404, detail="Tidak ada hasil yang sesuai.")
 
     titles = [{"title": item["title"], "link": item["link"]} for item in combined if item]
-
-    if not titles:
-        raise HTTPException(status_code=404, detail="Tidak ada hasil yang sesuai.")
 
     result = analyze_similarity(data.topic, titles)
     return result

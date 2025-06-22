@@ -21,6 +21,7 @@ import { AnalyzeResponse } from "../dto";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import AverageSimilarityCard from "./AverageSimilarityCard";
+import PaperCard from "./PaperCard";
 
 const AnalyzeForm = () => {
   // Data
@@ -93,29 +94,15 @@ const AnalyzeForm = () => {
           />
 
           <h3 className=" mt-4 py-3">
-            Judul-judul yang mungkin mirip punyamu (
-            {analyzeResult.results.length} ditemukan):
+            Ditemukan{" "}
+            <span className=" font-bold text-green-600 border border-green-600 p-1 rounded-full bg-green-50">
+              {analyzeResult.results.length}
+            </span>{" "}
+            judul yang mirip punyamu:
           </h3>
           <div className=" space-y-2">
             {analyzeResult.results.map((paper, index) => (
-              <Card key={index} className=" bg-white w-full">
-                <CardContent className=" flex justify-between items-center gap-2">
-                  <div>
-                    <h2 className=" line-clamp-1">{paper.title}</h2>
-                    <Link
-                      href={paper.link}
-                      className=" text-blue-500 underline text-sm line-clamp-1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {paper.link}
-                    </Link>
-                  </div>
-                  <div>
-                    <p>{paper.similarity.toFixed(2)}</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <PaperCard key={index} paper={paper} />
             ))}
           </div>
         </div>
