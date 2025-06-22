@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
@@ -11,19 +12,32 @@ def analyze_similarity(user_topic, titles_with_links):
             average_similarity=0.0,
             results=[]
         )
-    titles = [item["title"] for item in titles_with_links]
+    
+    try:
+        titles = [item["title"] for item in titles_with_links if "title" in item and "link" in item]
 
-    topic_embedding = model.encode(user_topic, convert_to_tensor=True)
-    title_embeddings = model.encode(titles, convert_to_tensor=True)
+        if not titles:
+            return AnalyzeResponse(
+                average_similarity=0.0,
+                results=[]
+            )
 
-    # Analyze similarity between input topic and all title results
-    sims = model.similarity(topic_embedding, title_embeddings)
-    scores = sims.squeeze().tolist()
+        topic_embedding = model.encode(user_topic, convert_to_tensor=True)
+        title_embeddings = model.encode(titles, convert_to_tensor=True)
 
-    results = [
-        PaperResult(title=item["title"], link=item["link"], similarity=float(sim))
-        for item, sim in zip(titles_with_links, scores)
-    ]
+        # Analyze similarity between input topic and all title results
+        sims = model.similarity(topic_embedding, title_embeddings)
+        scores = np.array(sims).squeeze().tolist()
 
-    avg = float(np.mean(scores))
-    return AnalyzeResponse(average_similarity=avg, results=results)
+        results = [
+            PaperResult(title=item["title"], link=item["link"], similarity=float(sim))
+            for item, sim in zip(titles_with_links, scores)
+            if "title" in item and "link" in item
+        ]
+
+        avg = float(np.mean(scores)) if scores else 0.0
+        return AnalyzeResponse(average_similarity=avg, results=results)
+
+    except Exception as e:
+        print(f"An error occurred during similarity analysis: {e}")
+        return HTTPException(status_code=500, detail="Terjadi kesalahan saat menghitung kemiripan.")

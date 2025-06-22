@@ -29,15 +29,24 @@ async def analyze_topic(data: AnalyzeRequest):
     if not is_valid:
         raise HTTPException(status_code=400, detail=result)
 
+    if not topic:
+        raise HTTPException(status_code=400, detail="Topik tidak boleh kosong.")
 
     doaj_results = await search_doaj(topic)
     s2_results = await search_s2(topic, 40)
 
-    print(s2_results)
+    if doaj_results is None or s2_results is None:
+        raise HTTPException(status_code=500, detail="Terjadi kesalahan pada server.")
 
     # Flatten all paper title
     combined = doaj_results + s2_results
-    titles = [{"title": item["title"], "link": item["link"]} for item in combined]
+    if not combined:
+        raise HTTPException(status_code=404, detail="Tidak ada hasil yang sesuai.")
+
+    titles = [{"title": item["title"], "link": item["link"]} for item in combined if item]
+
+    if not titles:
+        raise HTTPException(status_code=404, detail="Tidak ada hasil yang sesuai.")
 
     result = analyze_similarity(data.topic, titles)
     return result
