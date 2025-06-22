@@ -74,7 +74,7 @@ const AnalyzeForm = () => {
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
             <Search />
-            Analisa Keunikan
+            Cek Keunikan
           </Button>
         </form>
       </Form>

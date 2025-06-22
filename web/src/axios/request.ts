@@ -32,7 +32,7 @@ async function handleRequest<T>(
         ? {
             code: error.response?.status.toString() || "UNKNOWN_ERROR",
             message:
-              error.response?.data.message ?? error.response?.data,
+              error.response?.data.detail ?? error.response?.data,
           }
         : {
             code: "UNKNOWN_ERROR",
