@@ -5,3 +5,4 @@ numpy~=2.3.0
 uvicorn
 sentence-transformers~=4.1.0
 slowapi~=0.1.9
+google-genai

@@ -16,9 +16,9 @@ export default function Home() {
           </CardTitle>
 
           <p className=" text-muted-foreground text-sm">
-            Masukkan topik penelitianmu, dan kami bantu cek kemiripannya dengan
-            judul-judul jurnal dari berbagai sumber terpercaya. Praktis, cepat,
-            dan bikin kamu lebih pede buat majuin proposal!
+            Coba jelasin ide penelitianmu, dan kami bantu cek kemiripannya
+            dengan judul-judul jurnal dari berbagai sumber terpercaya. Praktis,
+            cepat, dan bikin kamu lebih pede buat majuin proposal!
           </p>
         </div>
 

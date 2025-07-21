@@ -2,25 +2,19 @@ from fastapi import HTTPException
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
-from models.schemas import PaperResult, AnalyzeResponse
+from models.schemas import PaperResult
 
 model = SentenceTransformer("paraphrase-MiniLM-L6-v2", device="cpu")
 
 def analyze_similarity(user_topic, titles_with_links):
     if not titles_with_links:
-        return AnalyzeResponse(
-            average_similarity=0.0,
-            results=[]
-        )
+        return []
     
     try:
         titles = [item["title"] for item in titles_with_links if "title" in item and "link" in item]
 
         if not titles:
-            return AnalyzeResponse(
-                average_similarity=0.0,
-                results=[]
-            )
+            return []
 
         topic_embedding = model.encode(user_topic, convert_to_tensor=True)
         title_embeddings = model.encode(titles, convert_to_tensor=True)
@@ -38,8 +32,8 @@ def analyze_similarity(user_topic, titles_with_links):
         # Sort results by similarity
         results.sort(key=lambda item: item.similarity, reverse=True)
 
-        avg = float(np.mean(scores)) if scores else 0.0
-        return AnalyzeResponse(average_similarity=avg, results=results)
+        # return results and scores
+        return results
 
     except Exception as e:
         print(f"An error occurred during similarity analysis: {e}")

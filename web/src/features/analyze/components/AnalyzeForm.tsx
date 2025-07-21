@@ -22,9 +22,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import AverageSimilarityCard from "./AverageSimilarityCard";
 import PaperCard from "./PaperCard";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AnalyzeForm = () => {
-  // Data
+  const [mode, setMode] = React.useState<"normal" | "yapping">("normal");
   const [analyzeResult, setAnalyzeResult] = React.useState<AnalyzeResponse>();
 
   const form = useForm<TopicSchemaType>({
@@ -34,12 +42,14 @@ const AnalyzeForm = () => {
     },
   });
 
-  async function onSubmit(values: TopicSchemaType) {
+  const onSubmit = async (data: TopicSchemaType) => {
     setAnalyzeResult(undefined);
-    const { error, data } = await handleRequest<AnalyzeResponse>(
+
+    const endpoint = mode === "normal" ? "/analyze-topic" : "/analyze-yapping";
+    const { error, data: response } = await handleRequest<AnalyzeResponse>(
       "POST",
-      "/analyze",
-      values
+      endpoint,
+      data
     );
 
     if (error) {
@@ -47,31 +57,69 @@ const AnalyzeForm = () => {
       return;
     }
 
-    setAnalyzeResult(data!);
-  }
+    setAnalyzeResult(response!);
+  };
 
   return (
-    <div className=" w-full">
+    <div className=" w-full space-y-3">
+      <div className=" flex items-center gap-2">
+        <span className=" text-sm">Pilih mode yang kamu suka</span>
+        <Select
+          onValueChange={(value) => {
+            setMode(value as "normal" | "yapping");
+            form.reset();
+          }}
+          defaultValue="normal"
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Mode" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="normal">😇 Masukkin Topik</SelectItem>
+            <SelectItem value="yapping">🗣️ Yapping</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex gap-2 w-full"
+          className="flex flex-col gap-2 w-full"
         >
-          <FormField
-            control={form.control}
-            name="topic"
-            render={({ field }) => (
-              <FormItem className=" w-full">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Masukkin ide topik penelitianmu"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {mode === "normal" && (
+            <FormField
+              control={form.control}
+              name="topic"
+              render={({ field }) => (
+                <FormItem className=" w-full">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Masukkin ide topik penelitianmu"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {mode === "yapping" && (
+            <FormField
+              control={form.control}
+              name="topic"
+              render={({ field }) => (
+                <FormItem className=" w-full">
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Jelasin ide penelitianmu dengan detail"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
             <Search />

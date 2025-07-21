@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -5,9 +6,12 @@ from models.schemas import AnalyzeResponse, AnalyzeRequest
 from services.doaj import search_doaj
 from services.semantic_scholar import search_s2
 from services.similiarity import analyze_similarity
-import re
+from services.topic_generator import generate_topic
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
+from utils.similarity import get_avg_similarity_score
+from utils.validator import validate_topic, validate_topic_yapping
 
 
 limiter = Limiter(key_func=get_remote_address)
@@ -17,7 +21,7 @@ app.state.limiter = limiter
 # 🛡️ Konfigurasi CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://risetunik.algieba-id.com", "http://risetunik.algieba-id.com"],
+    allow_origins=["http://localhost:3000", "https://risetunik.algieba.top", "http://risetunik.algieba.top"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,8 +33,8 @@ app.add_middleware(
 async def root(request: Request):
     return {"message": "Hello World"}
 
-@app.post("/analyze", response_model=AnalyzeResponse)
-@limiter.limit("2/minute")
+@app.post("/analyze-topic", response_model=AnalyzeResponse)
+@limiter.limit("3/minute")
 async def analyze_topic(data: AnalyzeRequest, request: Request):
     topic = data.topic
     is_valid, result = validate_topic(topic)
@@ -40,31 +44,61 @@ async def analyze_topic(data: AnalyzeRequest, request: Request):
     if not topic:
         raise HTTPException(status_code=400, detail="Topik tidak boleh kosong.")
 
-    doaj_results = await search_doaj(topic)
-    s2_results = await search_s2(topic, 40)
+    # Use asyncio.gather to send requests concurrently
+    doaj_results, s2_results = await asyncio.gather(
+        search_doaj(topic), search_s2(topic, 40)
+    )
 
     if doaj_results is None or s2_results is None:
         raise HTTPException(status_code=500, detail="Terjadi kesalahan pada server.")
 
     # Flatten all paper title
-    combined = doaj_results + s2_results
-
-    titles = [{"title": item["title"], "link": item["link"]} for item in combined if item]
+    titles = [{"title": item["title"], "link": item["link"]} for item in doaj_results + s2_results if item]
 
     result = analyze_similarity(data.topic, titles)
-    return result
+    average_similarity = get_avg_similarity_score(result)
 
+    return AnalyzeResponse(average_similarity=average_similarity, results=result)
 
+@app.post("/analyze-yapping", response_model=AnalyzeResponse)
+@limiter.limit("3/minute")
+async def analyze_topic(data: AnalyzeRequest, request: Request):
+    topic_desc = data.topic.strip()
+    is_valid, result = validate_topic_yapping(topic_desc)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=result)
 
-def validate_topic(topic: str):
-    topic = topic.strip()
+    topics = generate_topic(topic_desc)
+    print(topics)
+    if topics is None or topics.topic_id is None or topics.topic_en is None:
+        raise HTTPException(status_code=500, detail="Terjadi kesalahan pada server.")
 
-    # Minimal 5 kata
-    if len(topic.split()) < 5:
-        return False, "Topik harus terdiri dari minimal 5 kata."
+    async def fetch_results(topic):
+        doaj_results, s2_results = await asyncio.gather(
+            search_doaj(topic), search_s2(topic)
+        )
+        return doaj_results + s2_results
 
-    # Izinkan huruf, angka, dan simbol umum (&, ., , -)
-    if not re.match(r'^[a-zA-Z0-9\s.,()\-&]+$', topic):
-        return False, "Topik mengandung karakter tidak valid. Gunakan huruf, angka, dan tanda baca umum."
+    results_id, results_en = await asyncio.gather(
+        fetch_results(topics.topic_id),
+        fetch_results(topics.topic_en)
+    )
 
-    return True, topic
+    def extract_titles(results):
+        return [
+            {"title": item.get("title", "No Title"), "link": item.get("link", "#")}
+            for item in results if not isinstance(item, Exception)
+        ]
+
+    titles_id = extract_titles(results_id)
+    titles_en = extract_titles(results_en)
+
+    result_id, result_en = await asyncio.gather(
+        asyncio.to_thread(analyze_similarity, topics.topic_id, titles_id),
+        asyncio.to_thread(analyze_similarity, topics.topic_en, titles_en)
+    )
+
+    titles = result_id + result_en
+    average_similarity = get_avg_similarity_score(titles)
+
+    return AnalyzeResponse(average_similarity=average_similarity, results=titles)
