@@ -34,7 +34,7 @@ async def root(request: Request):
     return {"message": "Hello World"}
 
 @app.post("/analyze-topic", response_model=AnalyzeResponse)
-@limiter.limit("3/minute")
+@limiter.limit("5/minute")
 async def analyze_topic(data: AnalyzeRequest, request: Request):
     topic = data.topic
     is_valid, result = validate_topic(topic)
@@ -49,11 +49,10 @@ async def analyze_topic(data: AnalyzeRequest, request: Request):
         search_doaj(topic), search_s2(topic, 40)
     )
 
-    if doaj_results is None or s2_results is None:
-        raise HTTPException(status_code=500, detail="Terjadi kesalahan pada server.")
+    results = doaj_results + s2_results
 
     # Flatten all paper title
-    titles = [{"title": item["title"], "link": item["link"]} for item in doaj_results + s2_results if item]
+    titles = [{"title": item["title"], "link": item["link"]} for item in results if item]
 
     result = analyze_similarity(data.topic, titles)
     average_similarity = get_avg_similarity_score(result)
@@ -61,7 +60,7 @@ async def analyze_topic(data: AnalyzeRequest, request: Request):
     return AnalyzeResponse(average_similarity=average_similarity, results=result)
 
 @app.post("/analyze-yapping", response_model=AnalyzeResponse)
-@limiter.limit("3/minute")
+@limiter.limit("5/minute")
 async def analyze_topic(data: AnalyzeRequest, request: Request):
     topic_desc = data.topic.strip()
     is_valid, result = validate_topic_yapping(topic_desc)
@@ -84,10 +83,10 @@ async def analyze_topic(data: AnalyzeRequest, request: Request):
         fetch_results(topics.topic_en)
     )
 
-    def extract_titles(results):
+    def extract_titles(results: list):
         return [
             {"title": item.get("title", "No Title"), "link": item.get("link", "#")}
-            for item in results if not isinstance(item, Exception)
+            for item in results
         ]
 
     titles_id = extract_titles(results_id)
