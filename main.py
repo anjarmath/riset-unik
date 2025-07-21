@@ -14,8 +14,6 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 
-app = FastAPI()
-
 # 🛡️ Konfigurasi CORS
 app.add_middleware(
     CORSMiddleware,
