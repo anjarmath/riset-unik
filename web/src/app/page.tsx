@@ -1,3 +1,4 @@
+import { ModeToggle } from "@/components/mode-toggle";
 import { CardTitle } from "@/components/ui/card";
 import AnalyzeForm from "@/features/analyze/components/AnalyzeForm";
 import { AppIcon } from "@/lib/asset";
@@ -8,7 +9,16 @@ export default function Home() {
   return (
     <div className=" w-full">
       <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 items-center">
-        <Image src={AppIcon} width={150} height={80} alt="logo" />
+        <div className="flex gap-2 items-center">
+          <Image
+            src={AppIcon}
+            width={150}
+            height={80}
+            alt="logo"
+            className=" bg-amber-200"
+          />
+          <ModeToggle />
+        </div>
 
         <div className=" text-center space-y-2 mt-4">
           <CardTitle className=" text-lg">

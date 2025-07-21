@@ -118,7 +118,11 @@ const AnalyzeForm = () => {
             />
           )}
 
-          <Button type="submit" disabled={form.formState.isSubmitting}>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="text-white"
+          >
             <Search />
             Cek Keunikan
           </Button>
@@ -140,7 +144,7 @@ const AnalyzeForm = () => {
 
           <h3 className=" mt-4 py-3">
             Ditemukan{" "}
-            <span className=" font-bold text-green-600 border border-green-600 p-1 rounded-full bg-green-50">
+            <span className=" font-bold text-primary border-primary p-1 rounded-full bg-primary-foreground">
               {analyzeResult.results.length}
             </span>{" "}
             judul yang mirip punyamu:

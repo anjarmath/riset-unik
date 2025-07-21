@@ -63,7 +63,7 @@ const AverageSimilarityCard = ({
 }) => {
   const sim = identifySimilarity(avgSimilarity);
   return (
-    <Card className=" bg-white w-full">
+    <Card className="w-full">
       <CardContent className=" flex gap-3 items-center">
         <div>
           <p className=" text-sm text-muted-foreground">Kemiripan:</p>
