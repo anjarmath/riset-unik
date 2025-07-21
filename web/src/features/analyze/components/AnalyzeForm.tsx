@@ -9,7 +9,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -18,8 +17,6 @@ import { Loader2, Search } from "lucide-react";
 import handleRequest from "@/axios/request";
 import { toast } from "sonner";
 import { AnalyzeResponse } from "../dto";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import AverageSimilarityCard from "./AverageSimilarityCard";
 import PaperCard from "./PaperCard";
 import { Textarea } from "@/components/ui/textarea";
