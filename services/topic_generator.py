@@ -1,9 +1,10 @@
 import json
 from google import genai
 
+from config import config
 from models.schemas import TopicResult
 
-client = genai.Client(api_key="AIzaSyDn2tLYsb8KWHhAX1JU4EmSuWJ1RLTlPpI")
+client = genai.Client(api_key=config.get_settings().google_api_key)
 
 def generate_topic(topic_desc: str):
     content = f"""
