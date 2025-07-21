@@ -39,10 +39,20 @@
 
 ### 🔧 Backend
 
+- For Linux:
+
 ```bash
-cd backend
 python -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+.venv/bin/python -m uvicorn main:app --reload
+```
+
+- For Windows:
+
+```bash
+python -m venv .venv
+.venv/Scripts/activate
 pip install -r requirements.txt
 .venv/bin/python -m uvicorn main:app --reload
 ```
