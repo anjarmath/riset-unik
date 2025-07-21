@@ -9,10 +9,6 @@ class PaperResult(BaseModel):
     link: str
     similarity: float
 
-class AnalyzeResult(BaseModel):
-    scores: List[float]
-    results: List[PaperResult]
-
 class AnalyzeResponse(BaseModel):
     average_similarity: float
     results: List[PaperResult]
