@@ -8,18 +8,12 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div className=" w-full">
-      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 items-center">
-        <div className="flex gap-2 items-center">
-          <Image
-            src={AppIcon}
-            width={150}
-            height={80}
-            alt="logo"
-            className=" bg-amber-200"
-          />
-          <ModeToggle />
-        </div>
+      <div className="flex gap-2 items-center bg-primary-foreground justify-center py-4">
+        <Image src={AppIcon} width={150} height={80} alt="logo" />
+        <ModeToggle />
+      </div>
 
+      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 items-center">
         <div className=" text-center space-y-2 mt-4">
           <CardTitle className=" text-lg">
             Biar ide penelitianmu nggak pasaran.
