@@ -3,8 +3,10 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+    container_name: risetunik-web
     ports:
       - "80:80"
+      - "443:443"
     restart: always
     depends_on:
       - server
@@ -13,6 +15,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    container_name: risetunik-server
     ports:
       - "8000:8000"
     env_file:

@@ -1,0 +1,9 @@
+risetunik.algieba.top {
+    root * /usr/share/caddy
+    file_server
+
+    # Proxy ke backend
+    handle_path /api/* {
+        reverse_proxy risetunik-server:8000
+    }
+}
