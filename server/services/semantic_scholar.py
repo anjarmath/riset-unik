@@ -1,7 +1,7 @@
 import httpx
 import urllib.parse
 
-from server.config import config
+from config import config
 
 async def search_s2(topic: str, max_results=20):
     api_key = config.get_settings().s2_api_key
