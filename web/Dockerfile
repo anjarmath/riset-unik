@@ -13,26 +13,26 @@ RUN npm run build
 
 # ================================================================================================================
 # Stage 2: Serve dengan Caddy
-FROM caddy:2.10-alpine
-COPY --from=builder /app/frontend/out /usr/share/caddy
-COPY caddy/Caddyfile /etc/caddy/Caddyfile
+# FROM caddy:2.10-alpine
+# COPY --from=builder /app/frontend/out /usr/share/caddy
+# COPY caddy/Caddyfile /etc/caddy/Caddyfile
 
-EXPOSE 80 443
+# EXPOSE 80 443
 
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+# CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
 
 # ================================================================================================================
 # Stage 2: Serve dengan Nginx
-# FROM nginx:alpine
+FROM nginx:alpine
 
-# # Hapus default config
-# RUN rm /etc/nginx/conf.d/default.conf
+# Hapus default config
+RUN rm /etc/nginx/conf.d/default.conf
 
-# # Copy config custom
-# COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+# Copy config custom
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# # Copy hasil build static Next.js
-# COPY --from=builder /app/frontend/out /usr/share/nginx/html
+# Copy hasil build static Next.js
+COPY --from=builder /app/frontend/out /usr/share/nginx/html
 
-# EXPOSE 80
-# CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
