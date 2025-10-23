@@ -13,7 +13,7 @@ export default function Home() {
         <ModeToggle />
       </div>
 
-      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 items-center">
+      <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 items-center p-5">
         <div className=" text-center space-y-2 mt-4">
           <CardTitle className=" text-lg">
             Biar ide penelitianmu nggak pasaran.

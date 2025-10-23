@@ -19,7 +19,7 @@ const PaperCard = ({ paper }: { paper: PaperResult }) => {
           </Link>
         </div>
         <div className=" bg-primary-foreground aspect-square flex items-center p-2 rounded-lg ">
-          <p>{(paper.similarity * 100).toPrecision(2)}%</p>
+          <p>{(paper.similarity * 100).toFixed(1)}%</p>
         </div>
       </CardContent>
     </Card>

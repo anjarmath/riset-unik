@@ -68,7 +68,7 @@ const AverageSimilarityCard = ({
         <div>
           <p className=" text-sm text-muted-foreground">Kemiripan:</p>
           <p className="text-4xl font-bold" style={{ color: sim.color }}>
-            {(avgSimilarity * 100).toPrecision(2)}%
+            {(avgSimilarity * 100).toFixed(1)}%
           </p>
         </div>
 
