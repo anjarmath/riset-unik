@@ -1,10 +1,28 @@
 from fastapi import HTTPException
-from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer
+from onnxruntime import InferenceSession
 import numpy as np
 
 from models.schemas import PaperResult
 
-model = SentenceTransformer("paraphrase-MiniLM-L6-v2", device="cpu")
+model_dir = "onnx_model"
+tokenizer = AutoTokenizer.from_pretrained(model_dir, local_files_only=True)
+session = InferenceSession(f"{model_dir}/model.onnx")
+
+def encode(texts):
+    inputs = tokenizer(texts, padding=True, truncation=True, return_tensors="np")
+    inputs = {k: np.array(v, dtype=np.int64) for k, v in inputs.items()}
+    outputs = session.run(None, dict(inputs))
+    embeddings = outputs[0]
+
+    mask = np.expand_dims(inputs["attention_mask"], -1)
+    mask_sum = np.clip(mask.sum(1), a_min=1e-9, a_max=None)
+    mean_emb = (embeddings * mask).sum(1) / mask_sum
+    normed = mean_emb / np.linalg.norm(mean_emb, axis=1, keepdims=True)
+    return normed
+
+def cosine_similarity(a, b):
+    return np.dot(a, b.T).squeeze()
 
 def analyze_similarity(user_topic, titles_with_links):
     if not titles_with_links:
@@ -12,16 +30,14 @@ def analyze_similarity(user_topic, titles_with_links):
     
     try:
         titles = [item["title"] for item in titles_with_links if "title" in item and "link" in item]
-
         if not titles:
             return []
 
-        topic_embedding = model.encode(user_topic, convert_to_tensor=True)
-        title_embeddings = model.encode(titles, convert_to_tensor=True)
+        topic_embedding = encode([user_topic])
+        title_embeddings = encode(titles)
 
-        # Analyze similarity between input topic and all title results
-        sims = model.similarity(topic_embedding, title_embeddings)
-        scores = np.array(sims).squeeze().tolist()
+        sims = cosine_similarity(topic_embedding, title_embeddings)
+        scores = np.array(sims).tolist()
 
         results = [
             PaperResult(title=item["title"], link=item["link"], similarity=float(sim))
@@ -29,12 +45,9 @@ def analyze_similarity(user_topic, titles_with_links):
             if "title" in item and "link" in item
         ]
 
-        # Sort results by similarity
         results.sort(key=lambda item: item.similarity, reverse=True)
-
-        # return results and scores
         return results
 
     except Exception as e:
         print(f"An error occurred during similarity analysis: {e}")
-        return HTTPException(status_code=500, detail="Terjadi kesalahan saat menghitung kemiripan.")
+        raise HTTPException(status_code=500, detail="Terjadi kesalahan saat menghitung kemiripan.")

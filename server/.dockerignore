@@ -9,3 +9,4 @@ venv
 .env
 README.md
 .gitignore
+model
